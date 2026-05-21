@@ -1225,9 +1225,10 @@ Tambah Paket
 <script>
 
 const SUPABASE_URL = 'https://tfxdneqhgwvboemeqlnr.supabase.co';
+
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmeGRuZXFoZ3d2Ym9lbWVxbG5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyODg3MzAsImV4cCI6MjA5NDg2NDczMH0.5_ycY6KWySJne8g6ZFVhfWnT87GEgNbuOYsdmQLyqgY';
 
-const supabaseClient = supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
@@ -1253,31 +1254,42 @@ async function loadData(){
 
 /* LOAD PACKAGES */
 
-const { data: paketData } =
+const { data: paketData, error: paketError } =
 await supabaseClient
 .from('packages')
 .select('*')
 .order('id',{ ascending:false });
 
+if(paketError){
+  console.log(paketError);
+  alert('Error packages: ' + paketError.message);
+}
+
 if(paketData){
-
-packages = paketData;
-
+  packages = paketData;
 }
 
 /* LOAD HISTORI SALDO */
 
-const { data: saldoData } =
+const { data: saldoData, error: saldoError } =
 await supabaseClient
-.from('histori saldo')
+.from('histori_saldo')
 .select('*')
 .order('id',{ ascending:false });
 
-if(saldoData){
-
-riwayatSaldo = saldoData;
-
+if(saldoError){
+  console.log(saldoError);
+  alert('Error saldo: ' + saldoError.message);
 }
+
+if(saldoData){
+  riwayatSaldo = saldoData;
+}
+
+/* DEBUG */
+
+console.log(paketData);
+console.log(saldoData);
 
 /* HITUNG */
 
@@ -1293,7 +1305,7 @@ totalUangMasuk += Number(item.jumlah);
 packages.forEach(item=>{
 
 totalUangKeluar += Number(
-item['jumlah pembayaran']
+item['jumlah_pembayaran']
 );
 
 });
@@ -1505,7 +1517,7 @@ return;
 }
 
 await supabaseClient
-.from('histori saldo')
+.from('histori_saldo')
 .insert([{
 
 tanggal,
@@ -1586,7 +1598,7 @@ toko:marketplace,
 
 kurir:courier,
 
-'jumlah pembayaran':money,
+'jumlah_pembayaran':money,
 
 status:'Paket Datang'
 
@@ -1638,7 +1650,7 @@ ${item.status}
 
 <td>
 ${formatRupiah(
-item['jumlah pembayaran']
+item['jumlah_pembayaran']
 )}
 </td>
 
@@ -1669,7 +1681,7 @@ Sudah Diambil
 <small style="color:#94a3b8;">
 
 Diambil:
-${item['tanggal ambil']}
+${item['tanggal_ambil']}
 
 </small>
 
@@ -1740,7 +1752,7 @@ await supabaseClient
 
 status:'Sudah Diambil',
 
-'tanggal ambil':tanggalSekarang
+'tanggal_ambil':tanggalSekarang
 
 })
 .eq('id',id);
